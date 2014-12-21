@@ -1,11 +1,10 @@
 package com.springapp.mvc.test;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,5 +31,17 @@ public class UserController extends BaseRestController{
 
 		throw new RuntimeException();
 
+	}
+
+	@RequestMapping(value="/echo", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+	@ResponseStatus(HttpStatus.CREATED)
+	public ResponseEntity<Map<String, Object>> jsonException(@RequestHeader HttpHeaders headers,
+															 @RequestBody Map<String, Object> body) {
+
+		String userId = headers.getFirst("X-vnd-user-id");
+
+		body.put("userId", userId);
+
+		return new ResponseEntity<Map<String, Object>>(body, headers, HttpStatus.CREATED);
 	}
 }

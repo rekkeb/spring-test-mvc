@@ -10,10 +10,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -32,7 +35,7 @@ public class TestsUserController {
     }
 
     @Test
-    public void testUserJson() throws Exception {
+    public void testGetUserJson() throws Exception {
 
         mockMvc.perform(get("/user"))
                 .andExpect(status().isOk())
@@ -43,12 +46,32 @@ public class TestsUserController {
     }
 
     @Test
-    public void testUserJsonException() throws Exception {
+    public void testGetUserJsonException() throws Exception {
 
         mockMvc.perform(get("/exc"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.code", is(HttpStatus.INTERNAL_SERVER_ERROR.toString())))
+        ;
+    }
+
+    @Test
+    public void testPostUserJson() throws Exception {
+
+        //Builds the request
+        RequestBuilder request = post("/echo")
+                .header("X-vnd-user-id", "12345678")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\" : \"test\", \"surname\" : \"testTb\"}")
+                ;
+
+        mockMvc.perform(request)
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(header().string("X-vnd-user-id", notNullValue())) //Checks if header exists
+                .andExpect(jsonPath("$.name", is("test")))
+                .andExpect(jsonPath("$.surname", is("testTb")))
+                .andExpect(jsonPath("$.userId", is("12345678")))
         ;
     }
 }
