@@ -40,8 +40,14 @@ public class UserController extends BaseRestController{
 
 		String userId = headers.getFirst("X-vnd-user-id");
 
-		body.put("userId", userId);
+		Map<String, Object> res = new LinkedHashMap<String, Object>();
+		res.putAll(body);
 
-		return new ResponseEntity<Map<String, Object>>(body, headers, HttpStatus.CREATED);
+		res.put("userId", userId);
+
+		//Remove the ContentLength header to calculate the new length
+		headers.remove(HttpHeaders.CONTENT_LENGTH);
+
+		return new ResponseEntity<Map<String, Object>>(res, headers, HttpStatus.CREATED);
 	}
 }
